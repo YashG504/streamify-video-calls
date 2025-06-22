@@ -3,7 +3,13 @@ import useAuthUser from "../hooks/useAuthUser";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 import { completeOnboarding } from "../lib/api";
-import { LoaderIcon, MapPinIcon, ShipWheelIcon, ShuffleIcon } from "lucide-react";
+import {
+  LoaderIcon,
+  MapPinIcon,
+  ShipWheelIcon,
+  ShuffleIcon,
+  CameraIcon,
+} from "lucide-react";
 import { LANGUAGES } from "../constants";
 
 const OnboardingPage = () => {
@@ -25,36 +31,34 @@ const OnboardingPage = () => {
       toast.success("Profile onboarded successfully");
       queryClient.invalidateQueries({ queryKey: ["authUser"] });
     },
-
     onError: (error) => {
-      toast.error(error.response.data.message);
+      toast.error(error.response?.data?.message || "Something went wrong");
     },
   });
 
   const handleSubmit = (e) => {
     e.preventDefault();
-
     onboardingMutation(formState);
   };
 
   const handleRandomAvatar = () => {
-    const idx = Math.floor(Math.random() * 100) + 1; // 1-100 included
-    const randomAvatar = `https://avatar.iran.liara.run/public/${idx}.png`;
-
+    const seed = Math.random().toString(36).substring(2, 10);
+    const randomAvatar = `https://api.dicebear.com/7.x/adventurer/svg?seed=${seed}`;
     setFormState({ ...formState, profilePic: randomAvatar });
-    toast.success("Random profile picture generated!");
+    toast.success("Random avatar generated!");
   };
 
   return (
     <div className="min-h-screen bg-base-100 flex items-center justify-center p-4">
       <div className="card bg-base-200 w-full max-w-3xl shadow-xl">
         <div className="card-body p-6 sm:p-8">
-          <h1 className="text-2xl sm:text-3xl font-bold text-center mb-6">Complete Your Profile</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold text-center mb-6">
+            Complete Your Profile
+          </h1>
 
           <form onSubmit={handleSubmit} className="space-y-6">
-            {/* PROFILE PIC CONTAINER */}
+            {/* Avatar Preview */}
             <div className="flex flex-col items-center justify-center space-y-4">
-              {/* IMAGE PREVIEW */}
               <div className="size-32 rounded-full bg-base-300 overflow-hidden">
                 {formState.profilePic ? (
                   <img
@@ -68,17 +72,17 @@ const OnboardingPage = () => {
                   </div>
                 )}
               </div>
-
-              {/* Generate Random Avatar BTN */}
-              <div className="flex items-center gap-2">
-                <button type="button" onClick={handleRandomAvatar} className="btn btn-accent">
-                  <ShuffleIcon className="size-4 mr-2" />
-                  Generate Random Avatar
-                </button>
-              </div>
+              <button
+                type="button"
+                onClick={handleRandomAvatar}
+                className="btn btn-accent"
+              >
+                <ShuffleIcon className="size-4 mr-2" />
+                Generate Random Avatar
+              </button>
             </div>
 
-            {/* FULL NAME */}
+            {/* Full Name */}
             <div className="form-control">
               <label className="label">
                 <span className="label-text">Full Name</span>
@@ -87,13 +91,15 @@ const OnboardingPage = () => {
                 type="text"
                 name="fullName"
                 value={formState.fullName}
-                onChange={(e) => setFormState({ ...formState, fullName: e.target.value })}
+                onChange={(e) =>
+                  setFormState({ ...formState, fullName: e.target.value })
+                }
                 className="input input-bordered w-full"
                 placeholder="Your full name"
               />
             </div>
 
-            {/* BIO */}
+            {/* Bio */}
             <div className="form-control">
               <label className="label">
                 <span className="label-text">Bio</span>
@@ -101,15 +107,17 @@ const OnboardingPage = () => {
               <textarea
                 name="bio"
                 value={formState.bio}
-                onChange={(e) => setFormState({ ...formState, bio: e.target.value })}
+                onChange={(e) =>
+                  setFormState({ ...formState, bio: e.target.value })
+                }
                 className="textarea textarea-bordered h-24"
                 placeholder="Tell others about yourself and your language learning goals"
               />
             </div>
 
-            {/* LANGUAGES */}
+            {/* Languages */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {/* NATIVE LANGUAGE */}
+              {/* Native Language */}
               <div className="form-control">
                 <label className="label">
                   <span className="label-text">Native Language</span>
@@ -117,7 +125,12 @@ const OnboardingPage = () => {
                 <select
                   name="nativeLanguage"
                   value={formState.nativeLanguage}
-                  onChange={(e) => setFormState({ ...formState, nativeLanguage: e.target.value })}
+                  onChange={(e) =>
+                    setFormState({
+                      ...formState,
+                      nativeLanguage: e.target.value,
+                    })
+                  }
                   className="select select-bordered w-full"
                 >
                   <option value="">Select your native language</option>
@@ -129,7 +142,7 @@ const OnboardingPage = () => {
                 </select>
               </div>
 
-              {/* LEARNING LANGUAGE */}
+              {/* Learning Language */}
               <div className="form-control">
                 <label className="label">
                   <span className="label-text">Learning Language</span>
@@ -137,7 +150,12 @@ const OnboardingPage = () => {
                 <select
                   name="learningLanguage"
                   value={formState.learningLanguage}
-                  onChange={(e) => setFormState({ ...formState, learningLanguage: e.target.value })}
+                  onChange={(e) =>
+                    setFormState({
+                      ...formState,
+                      learningLanguage: e.target.value,
+                    })
+                  }
                   className="select select-bordered w-full"
                 >
                   <option value="">Select language you're learning</option>
@@ -150,7 +168,7 @@ const OnboardingPage = () => {
               </div>
             </div>
 
-            {/* LOCATION */}
+            {/* Location */}
             <div className="form-control">
               <label className="label">
                 <span className="label-text">Location</span>
@@ -161,16 +179,21 @@ const OnboardingPage = () => {
                   type="text"
                   name="location"
                   value={formState.location}
-                  onChange={(e) => setFormState({ ...formState, location: e.target.value })}
+                  onChange={(e) =>
+                    setFormState({ ...formState, location: e.target.value })
+                  }
                   className="input input-bordered w-full pl-10"
                   placeholder="City, Country"
                 />
               </div>
             </div>
 
-            {/* SUBMIT BUTTON */}
-
-            <button className="btn btn-primary w-full" disabled={isPending} type="submit">
+            {/* Submit */}
+            <button
+              className="btn btn-primary w-full"
+              disabled={isPending}
+              type="submit"
+            >
               {!isPending ? (
                 <>
                   <ShipWheelIcon className="size-5 mr-2" />
@@ -189,4 +212,5 @@ const OnboardingPage = () => {
     </div>
   );
 };
+
 export default OnboardingPage;
